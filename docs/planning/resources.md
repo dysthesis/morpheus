@@ -35,6 +35,7 @@ These may be useful for implementing the in-game chat. It would be ironic to mak
 - [Pumpkin-MC/Pumpkin](https://github.com/Pumpkin-MC/Pumpkin)
 - [PaperMC/Paper](https://github.com/PaperMC/Paper)
 - [feather-rs/feather](https://github.com/feather-rs/feather)
+- [ferrumc-rs/ferrumc](https://github.com/ferrumc-rs/ferrumc) 
 
 ## Libraries
 
