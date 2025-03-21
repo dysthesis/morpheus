@@ -6,6 +6,7 @@
   - [Relevant Twitter thread](https://xcancel.com/_sdomi/status/1489066397137354753?cursor=EwAAAPAEHBkWhMC40djc_aopJQISFQQAAA#r) 
 - [Java Edition protocol - Minecraft Wiki](https://minecraft.wiki/w/Java_Edition_protocol)
 - [How to Write a Server - wiki.vg](https://web.archive.org/web/20241129034323/https://wiki.vg/How_to_Write_a_Server)
+- [wiki.vg](https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge) 
 
 ## Performance
 
