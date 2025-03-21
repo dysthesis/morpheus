@@ -12,3 +12,6 @@ While the common wisdom would be to never roll your own crypto, that only applie
 
 - demonstrate the issues with rolling your own crypto, and
 - allow students to practice auditing a potentially errorneous implementation of a cryptographic algorithm implemented by a non-expert.
+
+> [!NOTE]
+> It appears that a true end-to-end-encrypted chat may necessitate a custom client.
