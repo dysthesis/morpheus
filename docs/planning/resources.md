@@ -2,6 +2,7 @@
 
 ## Minecraft server implementation
 
+- [My thoughts on writing a Minecraft server from scratch (in Bash) - sdomi's webpage](https://sdomi.pl/weblog/15-witchcraft-minecraft-server-in-bash/) **Start here!**
 - [Java Edition protocol - Minecraft Wiki](https://minecraft.wiki/w/Java_Edition_protocol)
 - [How to Write a Server - wiki.vg](https://web.archive.org/web/20241129034323/https://wiki.vg/How_to_Write_a_Server)
 
