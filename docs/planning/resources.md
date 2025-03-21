@@ -29,3 +29,15 @@ These may be useful for implementing the in-game chat. It would be ironic to mak
 - [How Signal Instant Messaging Protocol Works (& WhatsApp etc) - Computerphile](https://www.youtube.com/watch?v=DXv1boalsDI)
 - [Double Ratchet Messaging Encryption - Computerphile](https://www.youtube.com/watch?v=9sO2qdTci-s&t=1s) 
 - [What's Up With Group Messaging? - Computerphile](https://www.youtube.com/watch?v=Q0_lcKrUdWg)
+
+## Other similar projects
+
+- [Pumpkin-MC/Pumpkin](https://github.com/Pumpkin-MC/Pumpkin)
+- [PaperMC/Paper](https://github.com/PaperMC/Paper)
+- [feather-rs/feather](https://github.com/feather-rs/feather)
+
+## Libraries
+
+### Rust
+
+- [valence-rs/valence](https://github.com/valence-rs/valence) 
