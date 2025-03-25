@@ -71,19 +71,27 @@ test "server echoes data" {
     std.time.sleep(100 * std.time.ns_per_ms);
 
     {
-        const client = try connectToServer(test_port);
-        defer client.close();
+        const stream = try connectToServer(test_port);
+        defer stream.close();
+
+        const writer = stream.writer();
+        const reader = stream.reader();
 
         // Send the message
-        const message = "69420";
-        _ = try client.write(message);
+        const sent = "69420";
+        _ = try writer.writeAll(sent);
+        var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+        defer std.debug.assert(gpa.deinit() == .ok);
+        const allocator = gpa.allocator();
 
         // Read the response
-        var buf: [128]u8 = undefined;
-        const bytes_read = try client.read(buf);
+        const max_size: u8 = 100;
+        const received = try reader.readUntilDelimiterOrEofAlloc(allocator, '\n', max_size) orelse "";
+        // std.debug.print("Sent {}", sent);
+        // std.debug.print("Received {}", .{received});
 
         // The response should be the same as the messge
-        try testing.expectEqualStrings(message, buf[0..bytes_read]);
+        try testing.expectEqualStrings(sent, received);
     } // client closed
 
     // wait for the server to finish

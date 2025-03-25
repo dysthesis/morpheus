@@ -26,6 +26,7 @@ stdenv.mkDerivation {
     cp zig-out/bin/* $out/bin
   '';
 
+  # doCheck = true;
   checkPhase = ''
     zig build test
   '';
