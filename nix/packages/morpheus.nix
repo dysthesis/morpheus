@@ -2,9 +2,10 @@
   self,
   stdenv,
   git,
+  zig,
   ...
 }:
-stdenv.mkDerivation (_finalAttrs: {
+stdenv.mkDerivation {
   pname = "morpheus";
   version = "0.1.0";
 
@@ -12,12 +13,18 @@ stdenv.mkDerivation (_finalAttrs: {
 
   nativeBuildInputs = [
     git
+    zig
   ];
 
-  zigBuildFlags = "";
-
-  buildInputs = [
-  ];
+  buildPhase = ''
+    mkdir -p .cache
+    export XDG_CACHE_HOME=$PWD/.cache
+    zig build
+  '';
+  installPhase = ''
+    mkdir -p $out/bin
+    cp zig-out/bin/* $out/bin
+  '';
 
   dontConfigure = true;
 
@@ -25,4 +32,4 @@ stdenv.mkDerivation (_finalAttrs: {
     description = "A Minecraft server";
     mainProgram = "morpheus";
   };
-})
+}
