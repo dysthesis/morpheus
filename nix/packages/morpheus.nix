@@ -26,6 +26,10 @@ stdenv.mkDerivation {
     cp zig-out/bin/* $out/bin
   '';
 
+  checkPhase = ''
+    zig build test
+  '';
+
   dontConfigure = true;
 
   meta = {

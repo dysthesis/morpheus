@@ -1,46 +1,91 @@
-//! By convention, main.zig is where your main function lives in the case that
-//! you are building an executable. If you are making a library, the convention
-//! is to delete this file and start with root.zig instead.
-
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
-
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
-
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
-
-    try bw.flush(); // Don't forget to flush!
+    const port: u16 = 8080;
+    try runServer(port);
 }
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // Try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+// Runs a server at the given port
+fn runServer(port: u16) !void {
+    // Create a TCP server
+    const address = net.Address.initIp4(.{ 0, 0, 0, 0 }, port);
+    var server = try address.listen(.{});
+
+    std.debug.print("Server listening on {}\n", .{address});
+
+    while (true) {
+        // accept a connection
+        const client = try server.accept();
+        defer client.stream.close();
+        std.debug.print("Accepted connection from {}\n", .{client.address});
+
+        // handle connection
+        try handleConnection(client);
+    }
 }
 
-test "use other module" {
-    try std.testing.expectEqual(@as(i32, 150), lib.add(100, 50));
+// Handles each connection accepted by the servedr
+fn handleConnection(client: net.Server.Connection) !void {
+    defer client.stream.close();
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer std.debug.assert(gpa.deinit() == .ok);
+    const allocator = gpa.allocator();
+
+    const stream = client.stream;
+    const reader = stream.reader();
+    const writer = stream.writer();
+    const max_size: u8 = 100;
+
+    while (true) {
+        const message = try reader.readUntilDelimiterOrEofAlloc(allocator, '\n', max_size) orelse "";
+
+        // client closed the connection
+        if (message.len == 0) break;
+
+        std.debug.print("Received: {s}\n", .{message});
+
+        // TODO: actual action here
+        // Echo the data back to the client
+        _ = try writer.writeAll(message);
+    }
+
+    std.debug.print("Connection closed\n", .{});
 }
 
-test "fuzz example" {
-    const Context = struct {
-        fn testOne(context: @This(), input: []const u8) anyerror!void {
-            _ = context;
-            // Try passing `--fuzz` to `zig build test` and see if it manages to fail this test case!
-            try std.testing.expect(!std.mem.eql(u8, "canyoufindme", input));
-        }
-    };
-    try std.testing.fuzz(Context{}, Context.testOne, .{});
+// Test helper function
+fn connectToServer(port: u16) !net.Stream {
+    const address = try net.Address.resolveIp("127.0.0.1", port);
+    return try net.tcpConnectToAddress(address);
 }
 
 const std = @import("std");
+const net = std.net;
+const testing = std.testing;
+const Thread = std.Thread;
 
 /// This imports the separate module containing `root.zig`. Take a look in `build.zig` for details.
 const lib = @import("morpheus_lib");
+
+test "server echoes data" {
+    const test_port: u16 = 8081;
+    var server_thread = try Thread.spawn(.{}, runServer, .{test_port});
+
+    std.time.sleep(100 * std.time.ns_per_ms);
+
+    {
+        const client = try connectToServer(test_port);
+        defer client.close();
+
+        // Send the message
+        const message = "69420";
+        _ = try client.write(message);
+
+        // Read the response
+        var buf: [128]u8 = undefined;
+        const bytes_read = try client.read(buf);
+
+        // The response should be the same as the messge
+        try testing.expectEqualStrings(message, buf[0..bytes_read]);
+    } // client closed
+
+    // wait for the server to finish
+    server_thread.join();
+}
