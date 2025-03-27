@@ -39,9 +39,9 @@ pub fn VarInt(comptime I: type) type {
         /// data while the most significant bit determines whether there is another chunk after it.
         pub const Chunk = if (typeinfo.bits < 8) I else u8;
 
-        // TODO: figure out a better type for reader.
-        // TODO: document this method.
-        pub fn read(reader: anytype, out: *I) !void {
+        // TODO: Reading can probably be improved. The value of each chunk can be obtained in
+        // parallel to the reading of chunks. See: https://github.com/as-com/varint-simd
+        pub fn read(reader: std.io.Reader(u8), out: *I) !void {
             var result: Unit = 0;
 
             for (0..MaxBytes) |pos| {
