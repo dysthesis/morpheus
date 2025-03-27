@@ -1,6 +1,8 @@
 // Originally from:
 // https://github.com/regenerativep/zigmcp/blob/f3a5d84ed361120163e38399722ecf36c7f456b3/src/varint.zig
 
+const std = @import("std");
+
 /// This function takes in an arbitrary integer type `I` and returns a VarInt type that spans said
 /// integer type.
 ///
@@ -22,13 +24,15 @@ pub fn VarInt(comptime I: type) type {
     // our `VarInt` type to fit the integer type we are using.
     const typeinfo = @typeInfo(I).Int;
 
+    // A bitmask to get the bit indicating if there is another chunk after this.
     const CONTINUE_BITS = 0x80;
 
     return struct {
-        /// The unsigned version of I. This is because the encoding or decoding of `VarInt`s, by
-        /// definition, involves isolating 7 bits at a time. Using a signed type could result in
-        /// sign extensions during bit shifting; that is, extra 1 bits could appear on the left if
-        /// the number is negative.
+        /// The unsigned version of I, used as a 'buffer' to contain the bits read while they are
+        /// being processed. This is because the encoding or decoding of `VarInt`s, by definition,
+        /// involves isolating 7 bits at a time. Using a signed type could result in sign extensions
+        /// during bit shifting; that is, extra 1 bits could appear on the left if the number is
+        /// negative.
         pub const Unit = @Type(.Int{ .signedness = .unsigned, .bits = typeinfo.bits });
 
         /// This represents the maximum number of 7-bit chunks are needed to represent an integer
@@ -53,16 +57,17 @@ pub fn VarInt(comptime I: type) type {
                     return error.VarIntTooBig;
                 }
 
-                // TODO: document this part
-                result |= @as(Unit, @as(u7, @truncate(curr_chunk))) <<
-                    (7 * @as(std.math.Log2Int(Unit), @intCast(pos)));
+                // Get the position of the data section of the current chunk (the 7 last bits).
+                const data_pos = 7 * @as(std.math.Log2Int(Unit), @intCast(pos));
+
+                // Get the value of the current chunk, and combine it with the `result`
+                result |= @as(Unit, @as(u7, @truncate(curr_chunk))) << data_pos;
 
                 if (!continues) break;
             }
 
+            // TODO: Try to refactor this into a constructor, with I as an internal value instead.
             out.* = @bitCast(result);
         }
     };
 }
-
-const std = @import("std");
