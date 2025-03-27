@@ -7,6 +7,7 @@
 - [Java Edition protocol - Minecraft Wiki](https://minecraft.wiki/w/Java_Edition_protocol)
 - [How to Write a Server - wiki.vg](https://web.archive.org/web/20241129034323/https://wiki.vg/How_to_Write_a_Server)
 - [wiki.vg](https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge) 
+- [Protocol implementation in Zig](https://github.com/regenerativep/zigmcp) 
 
 ## Performance
 
