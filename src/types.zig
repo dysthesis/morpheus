@@ -41,7 +41,7 @@ pub fn VarInt(comptime I: type) type {
 
         // TODO: figure out a better type for reader.
         // TODO: document this method.
-        pub fn read(reader: anytype, out: *I, _: anytype) !void {
+        pub fn read(reader: anytype, out: *I) !void {
             var result: Unit = 0;
 
             for (0..MaxBytes) |pos| {
