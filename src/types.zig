@@ -44,7 +44,8 @@ pub fn VarInt(comptime I: type) type {
         pub const Chunk = if (typeinfo.bits < 8) I else u8;
 
         // TODO: Reading can probably be improved. The value of each chunk can be obtained in
-        // parallel to the reading of chunks. See: https://github.com/as-com/varint-simd
+        // parallel to the reading of chunks. See: https://github.com/as-com/varint-simd.
+        // Try benchmarking this, and use SIMD if there is a bottleneck here.
         pub fn read(reader: std.io.Reader(u8), out: *I) !void {
             var result: Unit = 0;
 
@@ -71,3 +72,16 @@ pub fn VarInt(comptime I: type) type {
         }
     };
 }
+
+// TODO: see if we can fuzz-test this instead
+pub const VarIntTestCases = .{
+    .{ .Type = i32, .value = 0, .chunks = .{0x00} },
+    .{ .Type = i32, .value = 1, .chunks = .{0x01} },
+    .{ .Type = i32, .value = 2, .chunks = .{0x02} },
+    .{ .Type = i32, .value = 127, .chunks = .{0x7f} },
+    .{ .Type = i32, .value = 128, .chunks = .{ 0x80, 0x01 } },
+    .{ .Type = i32, .value = 255, .chunks = .{ 0xff, 0x01 } },
+    .{ .Type = i32, .value = 25565, .chunks = .{ 0xdd, 0xc7, 0x01 } },
+    .{ .Type = i32, .value = 2097151, .chunks = .{ 0xff, 0xff, 0x7f } },
+    .{ .Type = i64, .value = 2147483647, .chunks = .{ 0xff, 0xff, 0xff, 0xff, 0x07 } },
+};
