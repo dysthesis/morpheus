@@ -62,7 +62,8 @@ pub fn VarInt(comptime I: type) type {
                 const data_pos = 7 * @as(std.math.Log2Int(Unit), @intCast(pos));
 
                 // Get the value of the current chunk, and combine it with the `result`
-                result |= @as(Unit, @as(u7, @truncate(curr_chunk))) << data_pos;
+                const data = @as(Unit, @as(u7, @truncate(curr_chunk))) << data_pos;
+                result |= data;
 
                 if (!continues) break;
             }
