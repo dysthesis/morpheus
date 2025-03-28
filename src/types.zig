@@ -2,6 +2,7 @@
 // https://github.com/regenerativep/zigmcp/blob/f3a5d84ed361120163e38399722ecf36c7f456b3/src/varint.zig
 
 const std = @import("std");
+const testing = std.testing;
 
 /// This function takes in an arbitrary integer type `I` and returns a VarInt type that spans said
 /// integer type.
@@ -28,6 +29,8 @@ pub fn VarInt(comptime I: type) type {
     const CONTINUE_BITS = 0x80;
 
     return struct {
+        value: I,
+        pub const Self = VarInt(I);
         /// The unsigned version of I, used as a 'buffer' to contain the bits read while they are
         /// being processed. This is because the encoding or decoding of `VarInt`s, by definition,
         /// involves isolating 7 bits at a time. Using a signed type could result in sign extensions
@@ -43,10 +46,18 @@ pub fn VarInt(comptime I: type) type {
         /// data while the most significant bit determines whether there is another chunk after it.
         pub const Chunk = if (typeinfo.bits < 8) I else u8;
 
+        /// Read in chunks and initialise a new instance of `VarInt`
+        pub fn fromBytes(reader: std.io.Reader(u8)) !Self {
+            const value: I = read(reader);
+            return Self{ .value = value };
+        }
+
         // TODO: Reading can probably be improved. The value of each chunk can be obtained in
         // parallel to the reading of chunks. See: https://github.com/as-com/varint-simd.
         // Try benchmarking this, and use SIMD if there is a bottleneck here.
-        pub fn read(reader: std.io.Reader(u8), out: *I) !void {
+
+        /// Read in chunks and return the resulting value.
+        pub fn read(reader: std.io.Reader(u8)) !I {
             var result: Unit = 0;
 
             for (0..MaxBytes) |pos| {
@@ -68,8 +79,7 @@ pub fn VarInt(comptime I: type) type {
                 if (!continues) break;
             }
 
-            // TODO: Try to refactor this into a constructor, with I as an internal value instead.
-            out.* = @bitCast(result);
+            return @bitCast(result);
         }
     };
 }
@@ -85,4 +95,16 @@ pub const VarIntTestCases = .{
     .{ .Type = i32, .value = 25565, .chunks = .{ 0xdd, 0xc7, 0x01 } },
     .{ .Type = i32, .value = 2097151, .chunks = .{ 0xff, 0xff, 0x7f } },
     .{ .Type = i64, .value = 2147483647, .chunks = .{ 0xff, 0xff, 0xff, 0xff, 0x07 } },
+    .{ .Type = i64, .value = -1, .chunks = .{ 0xff, 0xff, 0xff, 0xff, 0x0f } },
+    .{ .Type = i64, .value = -2147483648, .chunks = .{ 0x80, 0x80, 0x80, 0x80, 0x08 } },
 };
+
+test "VarInt read" {
+    inline for (VarIntTestCases) |case| {
+        const buf: [case.value.len]u8 = case.value;
+        var reader = std.io.fixedBufferStream(&buf);
+        const VarIntType = VarInt(case.Type);
+        const result: VarIntType = try VarIntType.fromBytes(reader.reader());
+        try testing.expectEqual(@as(case.Type, case.value), result.value);
+    }
+}
