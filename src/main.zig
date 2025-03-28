@@ -62,4 +62,5 @@ const net = std.net;
 const testing = std.testing;
 const Thread = std.Thread;
 
+const types = @import("types/main.zig");
 const ping = @import("ping.zig");
