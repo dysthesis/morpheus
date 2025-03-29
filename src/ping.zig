@@ -11,7 +11,7 @@ pub const ServerInfo = struct {
     players: ServerPlayers(u8), // Server player counts can't be negative, so use unsigned types.
 
     /// The description of the server.
-    description: ServerDescription,
+    description: []u8,
 
     // TODO: figure out what exactly this field is for
     enforcesSecureChat: bool,
@@ -41,8 +41,3 @@ pub fn ServerPlayers(comptime I: type) type {
         online: I,
     };
 }
-
-/// A wrapper around a string that contains the description for the server
-pub const ServerDescription = struct {
-    text: []u8,
-};

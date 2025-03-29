@@ -8,5 +8,6 @@ pkgs.mkShell {
     deadnix
     zig
     zls
+    zlint
   ];
 }
