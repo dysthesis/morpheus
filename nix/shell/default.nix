@@ -8,7 +8,6 @@ pkgs.mkShell {
     deadnix
     npins
     cargo
-    rust-analyzer
     rustToolchains.nightly
   ];
 }
