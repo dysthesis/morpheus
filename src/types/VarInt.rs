@@ -119,7 +119,7 @@ mod test {
     use super::*;
     use proptest::prelude::*;
     use std::io::Cursor;
-    const VARINT_MAX: Inner = 2_i64.pow(5 * 8);
+    const VARINT_MAX: Inner = 2_i64.pow(VarInt::MAX_SIZE.get() as u32 * 8);
 
     proptest! {
         #![proptest_config(ProptestConfig::with_cases(1000000))]
